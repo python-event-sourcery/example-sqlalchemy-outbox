@@ -7,7 +7,6 @@ from starlette.testclient import TestClient
 from main import app
 
 
-@pytest.mark.xfail(strict=True, raises=NotImplementedError)
 def test_manages_item_quantity_during_ordering(client: TestClient) -> None:
     # Given an item with quantity 4
     response = client.post(

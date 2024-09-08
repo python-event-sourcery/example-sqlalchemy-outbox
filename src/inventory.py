@@ -73,5 +73,9 @@ def create_item(
     name="inventory:get_quantity",
     status_code=200,
 )
-def get_quantity(item: str) -> int:
-    raise NotImplementedError
+def get_quantity(
+    item: str,
+    repository: QuantityRepository = Depends(quantity_repository),
+) -> int:
+    with repository.aggregate(StreamUUID(name=item), Quantity()) as aggregate:
+        return aggregate.quantity
