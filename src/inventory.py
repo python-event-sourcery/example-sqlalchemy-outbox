@@ -6,6 +6,7 @@ from event_sourcery.aggregate import Aggregate, Repository
 from event_sourcery.event_store import (
     Backend,
     Event,
+    Recorded,
     StreamUUID,
 )
 from fastapi import APIRouter, Body, Depends
@@ -30,7 +31,8 @@ class Quantity(Aggregate):
 
 
 class QuantityRepository(Repository[Quantity]):
-    pass
+    def publish(self, record: Recorded) -> None:
+        raise NotImplementedError
 
 
 def quantity_repository(
@@ -57,3 +59,12 @@ def create_item(
 ) -> None:
     with repository.aggregate(StreamUUID(name=item), Quantity()) as aggregate:
         aggregate.adjust(by=quantity)
+
+
+@router.get(
+    "/{item}",
+    name="inventory:get_quantity",
+    status_code=200,
+)
+def get_quantity(item: str) -> int:
+    raise NotImplementedError
