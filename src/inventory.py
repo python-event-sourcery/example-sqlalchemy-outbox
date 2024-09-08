@@ -11,6 +11,7 @@ from event_sourcery.event_store import (
 )
 from fastapi import APIRouter, Body, Depends
 
+import ordering
 from backend import backend
 
 
@@ -32,7 +33,13 @@ class Quantity(Aggregate):
 
 class QuantityRepository(Repository[Quantity]):
     def publish(self, record: Recorded) -> None:
-        raise NotImplementedError
+        event = record.metadata.event
+        if not isinstance(event, ordering.OrderPlaced):
+            return
+
+        item = event.item
+        with self.aggregate(StreamUUID(name=item), Quantity()) as aggregate:
+            aggregate.adjust(-event.units)
 
 
 def quantity_repository(
